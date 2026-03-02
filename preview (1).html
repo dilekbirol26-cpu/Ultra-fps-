@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mega FPS Benchmark</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#0f1323;
+ --card:#171c32;
+ --text:#fff;
+ --accent1:#00f5ff;
+ --accent2:#ff00c8;
+}
+body{
+ background:var(--bg);
+ color:var(--text);
+ font-family:Poppins,sans-serif;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ min-height:100vh;
+}
+.container{
+ width:650px;
+ background:var(--card);
+ padding:30px;
+ border-radius:25px;
+ box-shadow:0 0 40px rgba(0,0,0,0.5);
+}
+h2{margin-bottom:15px}
+input,select{
+ width:100%;
+ padding:10px;
+ margin-bottom:10px;
+ border-radius:10px;
+ border:none;
+}
+button{
+ width:100%;
+ padding:12px;
+ border:none;
+ border-radius:25px;
+ font-weight:600;
+ background:linear-gradient(90deg,var(--accent1),var(--accent2));
+ color:white;
+ cursor:pointer;
+}
+.fps{
+ font-size:40px;
+ margin-top:15px;
+ font-weight:700;
+ text-align:center;
+ background:linear-gradient(90deg,var(--accent1),var(--accent2));
+ -webkit-background-clip:text;
+ -webkit-text-fill-color:transparent;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>🌍 MEGA FPS DATABASE</h2>
+
+<input type="text" id="cpuSearch" placeholder="İşlemci ara...">
+<select id="cpu"></select>
+
+<input type="text" id="gpuSearch" placeholder="Ekran kartı ara...">
+<select id="gpu"></select>
+
+<select id="game"></select>
+
+<select id="resolution">
+<option value="1">1080p</option>
+<option value="0.8">1440p</option>
+<option value="0.6">4K</option>
+</select>
+
+<button onclick="calculate()">FPS HESAPLA</button>
+
+<div class="fps" id="result">--</div>
+</div>
+
+<script>
+
+// ================= CPU LİSTESİ =================
+
+let cpus=[];
+
+// Intel 10-15 nesil
+for(let gen=10; gen<=15; gen++){
+ ["i3","i5","i7","i9"].forEach(type=>{
+   cpus.push(`Intel ${type} ${gen}900K`);
+   cpus.push(`Intel ${type} ${gen}600K`);
+ });
+}
+
+// AMD Ryzen 1000-9000
+for(let gen=1000; gen<=9000; gen+=1000){
+ ["3","5","7","9"].forEach(type=>{
+   cpus.push(`Ryzen ${type} ${gen}X`);
+ });
+}
+
+// Apple M serisi
+["M1","M1 Pro","M1 Max","M2","M2 Pro","M3","M3 Max","M4"].forEach(m=>{
+ cpus.push(`Apple ${m}`);
+});
+
+// Qualcomm
+["Snapdragon X Elite","Snapdragon 8 Gen 3"].forEach(q=>{
+ cpus.push(`Qualcomm ${q}`);
+});
+
+// ================= GPU LİSTESİ =================
+
+let gpus=[];
+
+// NVIDIA RTX 2000-5000
+for(let series=2000; series<=5000; series+=1000){
+ [60,70,80,90].forEach(model=>{
+   gpus.push(`RTX ${series+model}`);
+ });
+}
+
+// AMD RX 5000-9000
+for(let series=5000; series<=9000; series+=1000){
+ [60,70,80,90].forEach(model=>{
+   gpus.push(`RX ${series+model} XT`);
+ });
+}
+
+// Intel Arc
+["Arc A380","Arc A750","Arc A770"].forEach(a=>{
+ gpus.push(a);
+});
+
+// ================= OYUN LİSTESİ =================
+
+let games=[
+ {name:"Valorant",weight:1.4},
+ {name:"CS2",weight:1.4},
+ {name:"Fortnite",weight:1.1},
+ {name:"GTA 5",weight:1.0},
+ {name:"Forza Horizon 5",weight:1.0},
+ {name:"Warzone",weight:0.8},
+ {name:"Cyberpunk 2077",weight:0.7},
+ {name:"Red Dead Redemption 2",weight:0.8},
+ {name:"Elden Ring",weight:0.9},
+ {name:"Minecraft",weight:1.3}
+];
+
+// ================= LİSTE DOLDUR =================
+
+function populate(selectId,data){
+ const select=document.getElementById(selectId);
+ select.innerHTML="";
+ data.forEach(item=>{
+   let opt=document.createElement("option");
+   opt.value=item.name?item.name:item;
+   opt.textContent=item.name?item.name:item;
+   select.appendChild(opt);
+ });
+}
+
+populate("cpu",cpus);
+populate("gpu",gpus);
+populate("game",games);
+
+// ================= ARAMA =================
+
+document.getElementById("cpuSearch").addEventListener("input",e=>{
+ let filtered=cpus.filter(c=>c.toLowerCase().includes(e.target.value.toLowerCase()));
+ populate("cpu",filtered);
+});
+
+document.getElementById("gpuSearch").addEventListener("input",e=>{
+ let filtered=gpus.filter(g=>g.toLowerCase().includes(e.target.value.toLowerCase()));
+ populate("gpu",filtered);
+});
+
+// ================= FPS HESAPLAMA =================
+
+function calculate(){
+
+ let cpu=document.getElementById("cpu").value;
+ let gpu=document.getElementById("gpu").value;
+ let gameName=document.getElementById("game").value;
+ let resolutionMultiplier=parseFloat(document.getElementById("resolution").value);
+
+ let cpuPower=parseInt(cpu.match(/\d+/))||1000;
+ let gpuPower=parseInt(gpu.match(/\d+/))||2000;
+
+ let gameWeight=games.find(g=>g.name===gameName).weight;
+
+ let base=(cpuPower/10 + gpuPower/20)*gameWeight*resolutionMultiplier;
+
+ let fps=Math.round(base);
+
+ if(fps<30) fps=30;
+ if(fps>800) fps=800;
+
+ document.getElementById("result").innerText=fps+" FPS";
+}
+
+</script>
+</body>
+</html>
